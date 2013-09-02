@@ -4,7 +4,7 @@ Spree::CheckoutController.class_eval do
   skip_before_filter :verify_authenticity_token, :only => [:payment_network_callback]
   
   def redirect_to_payment_network_form_if_needed
-    confirmation_step_present = current_order.payment_method && current_order.payment_method.payment_profiles_supported?
+    confirmation_step_present = current_order.confirmation_required?
     if !confirmation_step_present && params[:state] == "payment"
       return unless params[:order][:payments_attributes]
       if params[:order][:coupon_code]
@@ -15,7 +15,7 @@ Spree::CheckoutController.class_eval do
       payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
     elsif confirmation_step_present && params[:state] == "confirm"
       load_order
-      payment_method = @order.payment_method
+      payment_method = @order.pending_payments.select{ |p| p.payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)}.first
     end
 
     if !payment_method.nil? && payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)
