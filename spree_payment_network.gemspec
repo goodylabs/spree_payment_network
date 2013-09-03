@@ -7,10 +7,10 @@ Gem::Specification.new do |s|
   s.description = 'Add (optional) gem description here'
   s.required_ruby_version = '>= 1.9.3'
 
-  # s.author            = 'David Heinemeier Hansson'
-  # s.email             = 'david@loudthinking.com'
-  # s.homepage          = 'http://www.rubyonrails.org'
-  # s.rubyforge_project = 'actionmailer'
+  s.authors           = ['Grzegorz Błaszczyk','Tomasz Młocek']
+  s.email             = 'grzegorz.blaszczyk@goodylabs.com'
+  s.homepage          = 'http://www.goodylabs.com'
+  s.rubyforge_project = 'spree_payment_network'
 
   #s.files         = `git ls-files`.split("\n")
   #s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
