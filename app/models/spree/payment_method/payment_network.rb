@@ -35,5 +35,25 @@ module Spree
 
       Digest::SHA512.hexdigest(data.values.join('|'))
     end
+
+    def purchase(money, credit_card_or_referenced_id, options = {})
+
+      puts "****************"
+      puts credit_card_or_referenced_id.inspect
+
+      payment = Spree::Payment.find_by_source_id(credit_card_or_referenced_id)
+      errors.add(:payment, "couldn't find corresponding payment") if payment.nil?
+
+      puts "****************"
+      puts payment.response_code.inspect
+
+
+      if payment.response_code.present?
+        response = provider.capture(money,payment.response_code, options)
+      end
+
+      response
+    end
+
   end
 end
