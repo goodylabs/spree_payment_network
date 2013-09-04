@@ -7,8 +7,8 @@ Spree::CheckoutController.class_eval do
   
   def redirect_to_payment_network_form_if_needed
 
-    logger.info "=====> redirect_to_payment_network_form_if_needed ... @order: #{@order}"
-    unless @order.nil? || @order.payments.nil?
+    logger.info "=====> redirect_to_payment_network_form_if_needed ... @order: #{@order.inspect}"
+    if !@order.nil? && !@order.payments.nil? && @order.payments.size > 0
 
       payment_method = Spree::PaymentMethod.find(@order.payments.first[:payment_method_id])
 
