@@ -62,6 +62,10 @@ Spree::CheckoutController.class_eval do
       @order.save
       @order.finalize!
 
+      @order.state = 'complete'
+      @order.shipment_state = 'ready'
+      @order.save!
+
       flash[:notice] = I18n.t(:order_processed_successfully)
       redirect_to completion_route
     else
