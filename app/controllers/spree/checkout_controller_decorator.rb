@@ -13,11 +13,11 @@ Spree::CheckoutController.class_eval do
 
       if payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)
 
-        puts "=====> redirect_to_payment_network_form_if_needed ..."
+        logger.info "=====> redirect_to_payment_network_form_if_needed ..."
         confirmation_step_present = current_order.confirmation_required?
-        puts "=====> confirmation_step_present: #{confirmation_step_present} ..."
+        logger.info "=====> confirmation_step_present: #{confirmation_step_present} ..."
         if !confirmation_step_present && params[:state] == "payment"
-          puts "=====> [ payment ]confirmation_step_present: #{params[:state]} #{params[:order][:payments_attributes]} ..."
+          logger.info "=====> [ payment ]confirmation_step_present: #{params[:state]} #{params[:order][:payments_attributes]} ..."
           return unless params[:order][:payments_attributes]
           if params[:order][:coupon_code]
             @order.update_attributes(object_params)
@@ -26,15 +26,15 @@ Spree::CheckoutController.class_eval do
           load_order
           payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
         elsif confirmation_step_present && params[:state] == "confirm"
-          puts "=====> [ confirm ] confirmation_step_present: #{params[:state]} ..."
-          puts "=====> payment_method: lala #{payment_method.inspect}"
+          logger.info "=====> [ confirm ] confirmation_step_present: #{params[:state]} ..."
+          logger.info "=====> payment_method: lala #{payment_method.inspect}"
           load_order
-          puts "=====> order: #{@order.inspect} ..."
+          logger.info "=====> order: #{@order.inspect} ..."
           payment_method = @order.pending_payments.select{ |p| p.payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)}.first.payment_method
-          puts "=====> payment_method: #{payment_method.inspect} ..."
+          logger.info "=====> payment_method: #{payment_method.inspect} ..."
         end
 
-        puts "=====> 2nd payment_method: #{payment_method.inspect} ..."
+        logger.info "=====> 2nd payment_method: #{payment_method.inspect} ..."
 
         if !payment_method.nil? && payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)
           redirect_to "#{payment_method.server_url}?user_id=#{payment_method.preferred_user_id}&project_id=#{payment_method.preferred_project_id}&amount=#{@order.total}&reason_1=#{@order.number}&user_variable_0=#{payment_method.id}&user_variable_1=#{@order.id}&hash=#{payment_method.hash_value({:amount => @order.total, :reason_1 => @order.number, :user_variable_1 => @order.id})}"
@@ -46,10 +46,10 @@ Spree::CheckoutController.class_eval do
   end
   
   def payment_network_callback
-    puts "===> payment_network_callback ..."
+    logger.info "===> payment_network_callback ..."
     
     if @order && params[:status] == 'success'
-      puts "===> payment_network_callback success ..."
+      logger.info "===> payment_network_callback success ..."
       gateway = Spree::PaymentMethod.find(params[:payment_method_id])
 
       @order.payments.clear
@@ -58,7 +58,7 @@ Spree::CheckoutController.class_eval do
       payment.amount = @order.total
       payment.payment_method = gateway
       payment.complete
-      puts "===> payment completed ..."
+      logger.info "===> payment completed ..."
       @order.save
       @order.finalize!
 
@@ -70,7 +70,7 @@ Spree::CheckoutController.class_eval do
   end
 
   def load_sofort_order 
-    puts "Load SOFORT order"
+    logger.info "Load SOFORT order"
     @order = Spree::Order.find(params[:order_id])
   end
 

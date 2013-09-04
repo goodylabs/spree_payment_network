@@ -38,14 +38,14 @@ module Spree
 
     def purchase(money, credit_card_or_referenced_id, options = {})
 
-      puts "****************"
-      puts credit_card_or_referenced_id.inspect
+      logger.info "****************"
+      logger.info credit_card_or_referenced_id.inspect
 
       payment = Spree::Payment.find_by_source_id(credit_card_or_referenced_id)
       errors.add(:payment, "couldn't find corresponding payment") if payment.nil?
 
-      puts "****************"
-      puts payment.response_code.inspect
+      logger.info "****************"
+      logger.info payment.response_code.inspect
 
 
       if payment.response_code.present?
