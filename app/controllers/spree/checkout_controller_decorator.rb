@@ -7,13 +7,14 @@ Spree::CheckoutController.class_eval do
   
   def redirect_to_payment_network_form_if_needed
 
-    unless params[:order].nil? || params[:order][:payments_attributes].nil?
+    logger.info "=====> redirect_to_payment_network_form_if_needed ... @order: #{@order}"
+    unless @order.nil? || @order.payments.nil?
 
-      payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
+      payment_method = Spree::PaymentMethod.find(@order.payments.first[:payment_method_id])
 
       if payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)
 
-        logger.info "=====> redirect_to_payment_network_form_if_needed ..."
+        logger.info "=====> redirect_to_payment_network_form_if_needed for Spree::PaymentMethod::PaymentNetwork..."
         confirmation_step_present = current_order.confirmation_required?
         logger.info "=====> confirmation_step_present: #{confirmation_step_present} ..."
         if !confirmation_step_present && params[:state] == "payment"
@@ -27,16 +28,16 @@ Spree::CheckoutController.class_eval do
           payment_method = Spree::PaymentMethod.find(params[:order][:payments_attributes].first[:payment_method_id])
         elsif confirmation_step_present && params[:state] == "confirm"
           logger.info "=====> [ confirm ] confirmation_step_present: #{params[:state]} ..."
-          logger.info "=====> payment_method: lala #{payment_method.inspect}"
+          logger.info "=====> payment_method: #{payment_method.inspect}"
           load_order
           logger.info "=====> order: #{@order.inspect} ..."
           payment_method = @order.pending_payments.select{ |p| p.payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)}.first.payment_method
           logger.info "=====> payment_method: #{payment_method.inspect} ..."
         end
 
-        logger.info "=====> 2nd payment_method: #{payment_method.inspect} ..."
+        logger.info "=====> payment_method: #{payment_method.inspect} , params[:state]: #{params[:state]}..."
 
-        if !payment_method.nil? && payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)
+        if !payment_method.nil? && payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork) && params[:state] == "confirm"
           redirect_to "#{payment_method.server_url}?user_id=#{payment_method.preferred_user_id}&project_id=#{payment_method.preferred_project_id}&amount=#{@order.total}&reason_1=#{@order.number}&user_variable_0=#{payment_method.id}&user_variable_1=#{@order.id}&hash=#{payment_method.hash_value({:amount => @order.total, :reason_1 => @order.number, :user_variable_1 => @order.id})}"
         end
       end
