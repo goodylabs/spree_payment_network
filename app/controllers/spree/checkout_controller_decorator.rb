@@ -7,6 +7,11 @@ Spree::CheckoutController.class_eval do
   
   def redirect_to_payment_network_form_if_needed
 
+    if !params[:order][:coupon_code].blank?
+      logger.info "=====> redirect_to_payment_network_form_if_needed false - skipping... "
+      return
+    end
+
     logger.info "=====> redirect_to_payment_network_form_if_needed ... @order: #{@order.inspect}"
     if !@order.nil? && !@order.payments.nil? && @order.payments.size > 0
 
