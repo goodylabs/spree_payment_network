@@ -15,7 +15,14 @@ Spree::CheckoutController.class_eval do
     logger.info "=====> redirect_to_payment_network_form_if_needed ... @order: #{@order.inspect}"
     if !@order.nil? && !@order.payments.nil? && @order.payments.size > 0
 
-      payment_method = Spree::PaymentMethod.find(@order.payments.first[:payment_method_id])
+      payment_method = nil
+
+      # omit invalid payments
+      @order.payments.each do |payment|
+        if payment[:state] == 'checkout'
+          payment_method = Spree::PaymentMethod.find(payment[:payment_method_id])
+        end
+      end
 
       if payment_method.kind_of?(Spree::PaymentMethod::PaymentNetwork)
 
